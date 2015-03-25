@@ -52,7 +52,7 @@ customersApp.controller('CustomersController', ['$scope', '$stateParams', 'Authe
                 templateUrl: 'modules/customers/views/create-customer.client.view.html',
                 controller: function($scope, $modalInstance){
                     $scope.ok = function () {
-                        if(createCustomer.$valid) {
+                        if(!createCustomer.$invalid) {
                             $modalInstance.close();
                         }
                     };
@@ -65,19 +65,35 @@ customersApp.controller('CustomersController', ['$scope', '$stateParams', 'Authe
                 size: size
             });
 
-            modalInstance.result.then(function() {
+            modalInstance.result.then(function(selectedCustomer) {
             }, function() {
                 $log.info('Modal dismissed at: ' + new Date());
             });
         };
 
 
+		// Remove existing Customer
+		this.remove = function(customer) {
+			if ( customer ) {
+				customer.$remove();
+
+				for (var i in this.customers) {
+					if (this.customers [i] === customer) {
+						this.customers.splice(i, 1);
+					}
+				}
+			} else {
+				this.customer.$remove(function() {
+				});
+			}
+		};
+
     }
 
 ]);
 
-customersApp.controller('CustomersCreateController', ['$scope', 'Customers',
-    function($scope, Customers) {
+customersApp.controller('CustomersCreateController', ['$scope', 'Customers', 'Notify',
+    function($scope, Customers, Notify) {
 
         // Create new Customer
 		this.create = function() {
@@ -96,17 +112,7 @@ customersApp.controller('CustomersCreateController', ['$scope', 'Customers',
 
 			// Redirect after save
 			customer.$save(function(response) {
-				// Clear form fields
-                $scope.firstName = '';
-                $scope.surname = '';
-                $scope.suburb = '';
-                $scope.country = '';
-                $scope.industry = '';
-                $scope.email = '';
-                $scope.phone = '';
-                $scope.referred = false;
-                $scope.channel = '';
-
+                Notify.sendMsg('NewCustomer', {'id': response._id});
 			}, function(errorResponse) {
 				$scope.error = errorResponse.data.message;
 			});
@@ -117,7 +123,17 @@ customersApp.controller('CustomersCreateController', ['$scope', 'Customers',
 
 customersApp.controller('CustomersEditController', ['$scope',  'Customers',
     function($scope, Customers) {
-
+        $scope.channelOptions = [
+            {
+                id:1, item: 'Facebook'
+            },
+            {
+                id:2, item: 'Twitter'
+            },
+            {
+                id:3, item: 'Email'
+            }
+        ];
 		// Update existing Customer
 		this.update = function(updatedCustomer) {
 			var customer = updatedCustomer;
@@ -133,52 +149,18 @@ customersApp.controller('CustomersEditController', ['$scope',  'Customers',
     }
 ]);
 
-customersApp.directive('customerList', function() {
+customersApp.directive('customerList', ['Customers','Notify',function(Customers, Notify) {
     return {
         restrict: 'E',
         transclude: true,
         templateUrl: 'modules/customers/views/customer-list-template.html',
         link: function(scope, element, attrs) {
-
+            Notify.getMsg('NewCustomer', function(event, data){
+                scope.customersCtrl.customers = Customers.query();
+            });
         }
-    }
-});
+    };
+}]);
 
 
-//
-//		// Remove existing Customer
-//		$scope.remove = function(customer) {
-//			if ( customer ) {
-//				customer.$remove();
-//
-//				for (var i in $scope.customers) {
-//					if ($scope.customers [i] === customer) {
-//						$scope.customers.splice(i, 1);
-//					}
-//				}
-//			} else {
-//				$scope.customer.$remove(function() {
-//					$location.path('customers');
-//				});
-//			}
-//		};
-//
-//		// Update existing Customer
-//		$scope.update = function() {
-//			var customer = $scope.customer;
-//
-//			customer.$update(function() {
-//				$location.path('customers/' + customer._id);
-//			}, function(errorResponse) {
-//				$scope.error = errorResponse.data.message;
-//			});
-//		};
-//
-//
-//
-//// Find existing Customer
-//$scope.findOne = function() {
-//    $scope.customer = Customers.get({
-//        customerId: $stateParams.customerId
-//    });
-//};
+

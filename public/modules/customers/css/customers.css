@@ -3,7 +3,7 @@
 }
 
 .cust-list {
-    font-size: 100px;
+    font-size: 150px;
 }
 
 .checkbox-left {
@@ -13,4 +13,13 @@
 
 .text-pink {
     color: #ec407A;
+}
+
+.cust-profile-card {
+    padding-bottom: 15px;
+    padding-top: 15px;
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin: 0px 0 0 !important;
 }

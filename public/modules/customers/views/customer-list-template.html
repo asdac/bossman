@@ -1,5 +1,5 @@
 <div class="list-group">
-    <div class="col-xs-6 col-sm-4" data-ng-repeat="customer in customersCtrl.customers | filter:searchText">
+    <div class="col-xs-6 col-sm-4 cust-profile-card" data-ng-repeat="customer in customersCtrl.customers | filter:searchText">
         <a  ng-click="customersCtrl.modalUpdate('lg', customer)" class="list-group-item">
             <h4 class="cust-list text-center">
                 <i class="glyphicon glyphicon-user"  ng-class="{'text-primary': customer.referred, 'text-pink': !customer.referred}"></i>
@@ -10,6 +10,11 @@
                     <small class="list-group-item-text text-muted">
                             <span data-ng-bind="customer.created | date:'short'">
 
+                            </span>
+                            <span class="pull-right">
+                                <button class="btn btn-default btn-sm" ng-click="customersCtrl.remove(customer)">
+                                    <i class="glyphicon glyphicon-trash"></i>
+                                </button>
                             </span>
                     </small>
                 </div>
